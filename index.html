@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haber Avcısı V5.2 | Görsel Netlik</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brand-mark">HA</div>
+                <div>
+                    <h1>Haber <span>Avcısı</span></h1>
+                    <p>Haber Merkezi · V5.2</p>
+                </div>
+            </div>
+
+            <div class="top-stats">
+                <div class="stat">
+                    <span>Skor</span>
+                    <strong id="scoreText">0</strong>
+                </div>
+                <div class="stat">
+                    <span>Rekor</span>
+                    <strong id="bestText">0</strong>
+                </div>
+                <div class="stat compact-stat">
+                    <span>Yıldız</span>
+                    <strong id="totalStarsText">0/15</strong>
+                </div>
+                <div class="stat compact-stat trust-stat"><span>Güven</span><strong id="topReputationText">50</strong></div>
+                <div class="profile-chip">
+                    <span id="profileRankText">Stajyer Muhabir</span>
+                    <small id="profileLevelText">Seviye 1</small>
+                </div>
+                <button id="pauseButton" class="icon-button" type="button" aria-label="Duraklat">Ⅱ</button>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <aside class="side-panel left-panel">
+                <section class="panel-card mission-card">
+                    <div class="card-title">
+                        <span class="title-icon">●</span>
+                        <h2>Aktif Görev</h2>
+                    </div>
+                    <span id="levelBadge" class="level-badge">Bölüm 1</span>
+                    <h3 id="missionTitle">Kaza İhbarı</h3>
+                    <p id="missionText">Olay yerine ulaş, delilleri topla ve canlı yayına hazırlan.</p>
+
+                    <div class="progress-block">
+                        <div class="progress-label">
+                            <span>Görev ilerlemesi</span>
+                            <strong id="progressText">0%</strong>
+                        </div>
+                        <div class="progress-track">
+                            <div id="progressBar" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel-card route-card">
+                    <div class="card-title">
+                        <span class="title-icon">↗</span>
+                        <h2>Rota Seçimi</h2>
+                    </div>
+                    <div class="route-legend">
+                        <div><span class="route-dot safe"></span><b>Güvenli</b><small>Daha kolay geçiş</small></div>
+                        <div><span class="route-dot reward"></span><b>Ödüllü</b><small>Daha fazla delil</small></div>
+                    </div>
+                    <p id="routeStateText">Yol ayrımlarında tabelaları takip et.</p>
+                </section>
+
+                <section class="panel-card controls-card">
+                    <div class="card-title">
+                        <span class="title-icon">⌨</span>
+                        <h2>Kontroller</h2>
+                    </div>
+                    <div class="control-row"><kbd>A</kbd><kbd>D</kbd><span>Hareket</span></div>
+                    <div class="control-row"><kbd>←</kbd><kbd>→</kbd><span>Hareket</span></div>
+                    <div class="control-row"><kbd>W</kbd><kbd>↑</kbd><span>Zıplama</span></div>
+                    <div class="control-row"><kbd>Space</kbd><span>Zıplama</span></div>
+                    <div class="control-row"><kbd>S</kbd><kbd>↓</kbd><span>Etkileşim</span></div>
+                    <div class="control-row"><kbd>E</kbd><span>Tarama / etkileşim</span></div>
+                    <div class="control-row"><kbd>P</kbd><span>Duraklat</span></div>
+                </section>
+
+                <section class="panel-card tip-card">
+                    <div class="card-title">
+                        <span class="title-icon">i</span>
+                        <h2>Saha Notu</h2>
+                    </div>
+                    <p id="tipText">Yolu açmak için kontrol noktalarındaki soruları doğru cevapla.</p>
+                </section>
+            </aside>
+
+            <section class="game-stage">
+                <canvas id="gameCanvas" width="1280" height="720" aria-label="Haber Avcısı oyun alanı"></canvas>
+
+                <div id="menuOverlay" class="overlay active newsroom-overlay">
+                    <div class="modal newsroom-modal newsroom-v52">
+                        <div class="newsroom-dashboard">
+                            <section class="newsroom-feature">
+                                <div class="feature-grid-glow"></div>
+                                <div class="newsroom-logo-row">
+                                    <div class="newsroom-wordmark"><span>HA</span><div><small>TGRT HABER OYUNLARI</small><strong>Haber Avcısı</strong></div></div>
+                                    <span class="version-chip">V5.2</span>
+                                </div>
+                                <div class="newsroom-feature-copy">
+                                    <span class="eyebrow">SAHA NÖBETİ</span>
+                                    <h2>Haberi bul.<br><em>Gerçeği doğrula.</em></h2>
+                                    <p>Son açık şehirden devam et; okunaklı rotalarda ilerle, güvenilir bilgiyi seç ve canlı yayına hazırlan.</p>
+                                </div>
+                                <button id="startButton" class="continue-mission-button" type="button">
+                                    <span class="continue-play">▶</span>
+                                    <span class="continue-copy"><small>DEVAM ET</small><strong id="menuContinueMission">Kaza İhbarı</strong><em id="menuContinueCity">İstanbul · Bölüm 1</em></span>
+                                    <span class="continue-arrow">→</span>
+                                </button>
+                                <div class="continue-progress">
+                                    <div><span>Kariyer ilerlemesi</span><strong id="menuProgressText">0/5 şehir</strong></div>
+                                    <div class="progress-track"><div id="menuProgressBar" class="progress-fill"></div></div>
+                                </div>
+                            </section>
+
+                            <section class="newsroom-operations">
+                                <div class="operations-heading"><div><span class="eyebrow">HABER MASASI</span><h3>Görev Merkezi</h3></div><span class="desk-status"><i></i> ÇEVRİM İÇİ</span></div>
+                                <div class="operations-preview">
+                                    <div class="preview-reporter"><img src="assets/character/reporter-card.png" alt="Muhabir"></div>
+                                    <div><small>SIRADAKİ DOSYA</small><strong id="deskHeadline">İstanbul ekibi göreve hazır</strong><p>Haritadaki şehirleri tamamlayarak Baş Muhabir rütbesine ilerle.</p></div>
+                                </div>
+                                <div class="operations-stat-grid">
+                                    <div><span>Güven</span><strong id="menuReputationText">50</strong><small>itibar puanı</small></div>
+                                    <div><span>Yayın</span><strong id="menuBroadcastCount">0</strong><small>tamamlandı</small></div>
+                                    <div><span>Arşiv</span><strong id="menuCollectionCount">0/15</strong><small>parça bulundu</small></div>
+                                    <div><span>Soru Havuzu</span><strong id="menuQuestionCount">732</strong><small>akıllı tekrar sistemi</small></div>
+                                </div>
+                                <div class="menu-newsline"><span class="pulse-dot"></span><p>Platformlar, tehlikeler ve rota işaretleri artık yüksek kontrastlı saha diliyle gösteriliyor.</p></div>
+                            </section>
+                        </div>
+
+                        <nav class="newsroom-quick-menu" aria-label="Haber merkezi menüsü">
+                            <button id="chapterMapButton" class="quick-desk-action" type="button"><span>TR</span><div><strong>Şehir Haritası</strong><small>Görev ve yıldız seçimi</small></div></button>
+                            <button id="todayEventsButton" class="quick-desk-action" type="button"><span>AK</span><div><strong>Günün Olayları</strong><small>Haber zincirleri</small></div></button>
+                            <button id="collectionButton" class="quick-desk-action" type="button"><span>AR</span><div><strong>Basın Müzesi</strong><small>Koleksiyon arşivi</small></div></button>
+                            <button id="profileButton" class="quick-desk-action" type="button"><span>PR</span><div><strong>Muhabir Profili</strong><small>Rütbe ve başarımlar</small></div></button>
+                            <button id="rankingButton" class="quick-desk-action" type="button"><span>SR</span><div><strong>Sıralama</strong><small>Yerel performans</small></div></button>
+                            <button id="settingsButton" class="quick-desk-action" type="button"><span>AY</span><div><strong>Ayarlar</strong><small>Oyun deneyimi</small></div></button>
+                        </nav>
+                    </div>
+                </div>
+                <div id="briefingOverlay" class="overlay">
+                    <div class="modal briefing-modal">
+                        <div class="briefing-header">
+                            <span id="briefingEyebrow" class="eyebrow">YENİ GÖREV</span>
+                            <div id="briefingWeather" class="weather-chip">Güneşli</div>
+                        </div>
+                        <h2 id="briefingTitle">Kaza İhbarı</h2>
+                        <p id="briefingText"></p>
+                        <div class="briefing-grid">
+                            <div class="briefing-box">
+                                <strong>3 yıldız hedefleri</strong>
+                                <ul id="briefingGoals"></ul>
+                            </div>
+                            <div class="briefing-box">
+                                <strong>Rota yapısı</strong>
+                                <p id="briefingRouteText"></p>
+                            </div>
+                        </div>
+                        <button id="beginLevelButton" class="primary-button" type="button">Göreve Çık</button>
+                    </div>
+                </div>
+
+                <div id="miniGameOverlay" class="overlay">
+                    <div class="modal mini-game-modal">
+                        <span id="miniGameLabel" class="eyebrow">SAHA GÖREVİ</span>
+                        <h2 id="miniGameTitle">Görevi Tamamla</h2>
+                        <p id="miniGameText"></p>
+                        <div id="miniGameArea" class="mini-game-area"></div>
+                        <p id="miniGameFeedback" class="feedback" aria-live="polite"></p>
+                        <button id="miniGameAction" class="primary-button hidden" type="button">Onayla</button>
+                    </div>
+                </div>
+
+                <div id="questionOverlay" class="overlay">
+                    <div class="modal question-modal">
+                        <div class="question-heading-line"><span class="eyebrow">HABER KONTROL NOKTASI</span><span id="questionMeta" class="question-meta">GENEL · KOLAY</span></div>
+                        <h2 id="questionTitle">Yolu Aç</h2>
+                        <p id="questionText"></p>
+                        <div id="answerList" class="answer-list"></div>
+                        <p id="questionFeedback" class="feedback" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <div id="broadcastOverlay" class="overlay">
+                    <div class="modal broadcast-modal">
+                        <span class="live-pill">● CANLI</span>
+                        <h2>Doğru Anda Yayına Gir</h2>
+                        <p>Gösterge yeşil alanın içindeyken butona bas.</p>
+
+                        <div class="broadcast-meter">
+                            <div class="meter-target"></div>
+                            <div id="meterNeedle" class="meter-needle"></div>
+                        </div>
+
+                        <button id="broadcastButton" class="primary-button" type="button">Yayına Gir</button>
+
+                        <div id="broadcastResult" class="broadcast-result hidden">
+                            <div id="starsText" class="stars">★★★</div>
+                            <h3 id="resultTitle">Mükemmel Yayın!</h3>
+                            <p id="resultText"></p>
+                            <button id="nextLevelButton" class="secondary-button" type="button">Sonraki Bölüm</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="pauseOverlay" class="overlay">
+                    <div class="modal compact-modal">
+                        <span class="eyebrow">OYUN DURAKLATILDI</span>
+                        <h2>Kısa Bir Mola</h2>
+                        <button id="resumeButton" class="primary-button" type="button">Devam Et</button>
+                        <button id="restartLevelButton" class="secondary-button" type="button">Bölümü Yeniden Başlat</button>
+                    </div>
+                </div>
+
+                <div id="gameOverOverlay" class="overlay">
+                    <div class="modal compact-modal">
+                        <span class="eyebrow danger">YAYIN KESİLDİ</span>
+                        <h2>Görev Başarısız</h2>
+                        <p id="gameOverText">Saha ekibinin yeniden hazırlanması gerekiyor.</p>
+                        <button id="retryButton" class="primary-button" type="button">Tekrar Dene</button>
+                        <button id="menuButton" class="secondary-button" type="button">Ana Menü</button>
+                    </div>
+                </div>
+
+                <div id="levelCompleteOverlay" class="overlay">
+                    <div class="modal level-complete-modal">
+                        <span class="eyebrow">GÖREV RAPORU</span>
+                        <h2 id="levelCompleteTitle">Bölüm Tamamlandı</h2>
+                        <div id="levelStarsText" class="big-stars">★★★</div>
+                        <p id="levelCompleteText"></p>
+                        <div class="report-grid">
+                            <div><span>Bölüm puanı</span><strong id="levelScoreText">0</strong></div>
+                            <div><span>Toplanan delil</span><strong id="levelEvidenceResult">0</strong></div>
+                            <div><span>Hasar</span><strong id="levelDamageResult">0</strong></div>
+                            <div><span>Görevler</span><strong id="levelMissionResult">0/2</strong></div>
+                            <div><span>Yayın kalitesi</span><strong id="levelQualityResult">0%</strong></div>
+                            <div><span>Güven değişimi</span><strong id="levelReputationResult">+0</strong></div>
+                            <div><span>Toplam izleyici</span><strong id="levelViewerResult">0</strong></div>
+                            <div><span>Gizli görev</span><strong id="levelSecretResult">Bulunamadı</strong></div>
+                        </div>
+                        <div id="unlockNotice" class="unlock-notice hidden"></div>
+                        <div class="modal-actions">
+                            <button id="levelNextButton" class="primary-button" type="button">Sonraki Bölüm</button>
+                            <button id="levelMenuButton" class="secondary-button" type="button">Ana Menü</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mapOverlay" class="overlay">
+                    <div class="modal map-modal">
+                        <div class="modal-heading-row">
+                            <div><span class="eyebrow">TÜRKİYE HABER HARİTASI</span><h2>Şehir Görevleri</h2><p id="mapSummaryText" class="map-summary">Açık şehirlerden bir saha dosyası seç.</p></div>
+                            <button id="closeMapButton" class="close-button" type="button">×</button>
+                        </div>
+                        <div id="mapRoute" class="turkey-route-map" aria-label="Şehir ilerleme rotası"></div>
+                        <div id="chapterCards" class="chapter-cards"></div>
+                    </div>
+                </div>
+
+                <div id="profileOverlay" class="overlay">
+                    <div class="modal profile-modal">
+                        <div class="modal-heading-row">
+                            <div><span class="eyebrow">MUHABİR PROFİLİ</span><h2 id="profileModalRank">Stajyer Muhabir</h2></div>
+                            <button id="closeProfileButton" class="close-button" type="button">×</button>
+                        </div>
+                        <div class="profile-progress">
+                            <div class="profile-level-orb" id="profileModalLevel">1</div>
+                            <div>
+                                <strong id="profileXpText">0 / 1000 XP</strong>
+                                <div class="progress-track"><div id="profileXpBar" class="progress-fill xp-fill"></div></div>
+                            </div>
+                        </div>
+                        <div class="profile-trust-card"><span>TGRT Güven Puanı</span><strong id="profileReputationText">50</strong><small id="profileReputationRank">Gelişen Muhabir</small></div>
+                        <div class="equipment-grid">
+                            <div><span>▣</span><small>Kamera</small><strong id="cameraLevelText">Seviye 1</strong></div>
+                            <div><span>●</span><small>Mikrofon</small><strong id="microphoneLevelText">Seviye 1</strong></div>
+                            <div><span>▤</span><small>Haber Çantası</small><strong id="bagLevelText">Seviye 1</strong></div>
+                        </div>
+                        <h3 class="profile-subtitle">Başarımlar</h3>
+                        <div id="achievementGrid" class="achievement-grid"></div>
+                    </div>
+                </div>
+
+                <div id="todayEventsOverlay" class="overlay">
+                    <div class="modal desk-modal">
+                        <div class="modal-heading-row"><div><span class="eyebrow">GÜNÜN OLAYLARI</span><h2>Haber Akışı</h2></div><button id="closeTodayEventsButton" class="close-button" type="button">×</button></div>
+                        <div id="todayEventCards" class="today-event-cards"></div>
+                    </div>
+                </div>
+                <div id="collectionOverlay" class="overlay">
+                    <div class="modal collection-modal">
+                        <div class="modal-heading-row"><div><span class="eyebrow">BASIN MÜZESİ</span><h2>Haber Arşivi</h2></div><button id="closeCollectionButton" class="close-button" type="button">×</button></div>
+                        <p class="collection-intro">Görevlerde bulunan özel parçalar burada kalıcı olarak sergilenir.</p><div id="collectionGrid" class="collection-grid"></div>
+                    </div>
+                </div>
+                <div id="rankingOverlay" class="overlay">
+                    <div class="modal ranking-modal">
+                        <div class="modal-heading-row"><div><span class="eyebrow">HABER MERKEZİ SIRALAMASI</span><h2>Haftanın Muhabirleri</h2></div><button id="closeRankingButton" class="close-button" type="button">×</button></div>
+                        <p class="ranking-note">Bu sürümde sıralama cihazdaki bölüm rekorlarından hesaplanan yerel bir performans tablosudur.</p><div id="rankingList" class="ranking-list"></div>
+                    </div>
+                </div>
+                <div id="settingsOverlay" class="overlay">
+                    <div class="modal settings-modal">
+                        <div class="modal-heading-row"><div><span class="eyebrow">AYARLAR</span><h2>Oyun Deneyimi</h2></div><button id="closeSettingsButton" class="close-button" type="button">×</button></div>
+                        <div class="settings-list">
+                            <label><span><strong>Kompakt görev kartları</strong><small>Büyük pencereler yerine köşe HUD kartları kullanılır.</small></span><input id="compactHudToggle" type="checkbox" checked></label>
+                            <label><span><strong>Dinamik hava</strong><small>Sabah, akşam, gece, yağmur ve sis dönüşümlü kullanılır.</small></span><input id="dynamicWeatherToggle" type="checkbox" checked></label>
+                            <label><span><strong>Kamera sarsıntısı</strong><small>Çarpışma ve kritik an efektleri.</small></span><input id="cameraShakeToggle" type="checkbox" checked></label>
+                        </div>
+                    </div>
+                </div>
+                <div id="liveTvOverlay" class="overlay">
+                    <div class="modal live-tv-modal">
+                        <div class="tv-frame">
+                            <div class="tv-topline"><span class="live-pill">● CANLI</span><strong id="tvCityText">İSTANBUL</strong><span id="tvClockText">20:45</span></div>
+                            <div class="tv-scene"><div class="tv-reporter"><img src="assets/character/reporter-card.png" alt="Muhabir"></div><div class="tv-quality-badge"><span>Yayın Kalitesi</span><strong id="tvQualityText">85%</strong></div></div>
+                            <div class="tv-lower-third"><span id="tvBreakingText">SON DAKİKA</span><strong id="tvHeadlineText">Olay yerinden ilk doğrulanmış bilgiler</strong></div>
+                            <div id="tvTickerText" class="tv-ticker">Haber Avcısı saha ekibi canlı yayında</div>
+                        </div>
+                        <p id="tvReportText" class="tv-report-text"></p><button id="closeLiveTvButton" class="primary-button" type="button">Görev Raporuna Geç</button>
+                    </div>
+                </div>
+                <div id="completeOverlay" class="overlay">
+                    <div class="modal complete-modal">
+                        <span class="eyebrow">TÜM GÖREVLER TAMAMLANDI</span>
+                        <h2>Günün Muhabiri Sensin!</h2>
+                        <p id="completeText"></p>
+                        <div class="trophy">🏆</div>
+                        <button id="playAgainButton" class="primary-button" type="button">Yeniden Oyna</button>
+                    </div>
+                </div>
+
+                <div id="decisionOverlay" class="overlay">
+                    <div class="modal decision-modal">
+                        <span class="eyebrow danger">SON DAKİKA KARARI</span>
+                        <h2 id="decisionTitle">Rotanı Seç</h2>
+                        <p id="decisionText"></p>
+                        <div id="decisionTimer" class="decision-timer">8</div>
+                        <div id="decisionOptions" class="decision-options"></div>
+                        <small>Karar verilmezse güvenli rota otomatik seçilir.</small>
+                    </div>
+                </div>
+
+                <div id="interviewOverlay" class="overlay">
+                    <div class="modal interview-modal">
+                        <span class="eyebrow">SAHA RÖPORTAJI</span>
+                        <h2 id="interviewTitle">Doğru Kaynağı Bul</h2>
+                        <p id="interviewText"></p>
+                        <div id="interviewOptions" class="interview-options"></div>
+                        <p id="interviewFeedback" class="feedback" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <div id="fieldPhotoOverlay" class="overlay">
+                    <div class="modal field-photo-modal">
+                        <span class="eyebrow">KAMERA GÖREVİ</span>
+                        <h2 id="fieldPhotoTitle">Kadrajı Yakala</h2>
+                        <p id="fieldPhotoText"></p>
+                        <div class="field-photo-view">
+                            <div class="photo-scene-mark">OLAY NOKTASI</div>
+                            <div class="photo-target-zone"></div>
+                            <div id="photoNeedle" class="photo-focus-needle"></div>
+                            <div class="photo-corner tl"></div><div class="photo-corner tr"></div>
+                            <div class="photo-corner bl"></div><div class="photo-corner br"></div>
+                        </div>
+                        <button id="photoCaptureButton" class="primary-button" type="button">Fotoğrafı Çek</button>
+                        <p id="fieldPhotoFeedback" class="feedback" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <div id="reportBossOverlay" class="overlay">
+                    <div class="modal report-boss-modal">
+                        <span class="live-pill">● YAYIN ARACI</span>
+                        <h2>Canlı Yayını Kur</h2>
+                        <p id="reportBossText">Ekipmanı doğru sırayla hazırlayarak yayına geç.</p>
+                        <div id="reportBossSteps" class="report-boss-steps"></div>
+                        <div id="reportBossChallenge" class="report-boss-challenge"></div>
+                        <p id="reportBossFeedback" class="feedback" aria-live="polite"></p>
+                    </div>
+                </div>
+
+                <div id="droneHud" class="drone-hud">
+                    <div><span>DRONE TARAMASI</span><strong id="droneTimerText">12.0 sn</strong></div>
+                    <p id="droneObjectiveText">Hedeflere yaklaş ve Space / E ile tara.</p>
+                    <div id="droneTargetList" class="drone-target-list"></div>
+                </div>
+
+                <div id="deadlineWidget" class="deadline-widget">
+                    <span>CANLI YAYIN BASKISI</span>
+                    <strong id="deadlineText">20.0</strong>
+                    <small id="deadlineObjective">Hedefe zamanında ulaş</small>
+                    <div class="deadline-track"><div id="deadlineBar" class="deadline-bar"></div></div>
+                </div>
+
+                <div id="radioPanel" class="radio-panel">
+                    <div id="radioAvatar" class="radio-avatar">ŞEF</div>
+                    <div><strong id="radioSpeaker">Haber Merkezi</strong><p id="radioText">Saha bağlantısı kuruluyor.</p></div>
+                </div>
+
+                <div id="interactionHint" class="interaction-hint">
+                    <kbd>↓</kbd><kbd>E</kbd><span id="interactionHintText">Etkileşim</span>
+                </div>
+
+                <div id="missionHudCard" class="mission-hud-card"><div class="mission-hud-head"><span id="missionHudIcon">◎</span><strong id="missionHudTitle">Saha görevi</strong><em id="missionHudTimer"></em></div><p id="missionHudText">Görev bilgisi</p><div id="missionHudActions" class="mission-hud-actions"></div></div>
+                <div id="vehicleHud" class="vehicle-hud"><div><span id="vehicleIcon">AR</span><strong id="vehicleTitle">Motosiklet Takibi</strong></div><small id="vehicleObjective">Engelleri aş ve hedefe yetiş</small><div class="vehicle-track"><div id="vehicleProgressBar" class="vehicle-progress"></div></div></div>
+                <div id="weatherHud" class="weather-hud"><span id="weatherIcon">☀</span><div><strong id="weatherPeriodText">Gündüz</strong><small id="weatherConditionText">Açık</small></div></div>
+                <div id="qualityHud" class="quality-hud"><div><span>Yayın Kalitesi</span><strong id="qualityText">50%</strong></div><div class="quality-track"><div id="qualityBar" class="quality-bar"></div></div></div>
+                <div id="reputationHud" class="reputation-hud"><span>TGRT Güven</span><strong id="reputationText">50</strong><small id="reputationRankText">Gelişen Muhabir</small></div>
+                <div id="newsTicker" class="news-ticker"><span>SON DAKİKA</span><div class="ticker-window"><p id="newsTickerText">Haber merkezi saha ekiplerinden doğrulanmış bilgi bekliyor.</p></div></div>
+                <div id="eventBanner" class="event-banner">
+                    <span id="eventIcon">!</span>
+                    <div><strong id="eventTitle">Son Dakika</strong><small id="eventText">Yeni saha bilgisi geldi.</small></div>
+                </div>
+                <div id="toastStack" class="toast-stack" aria-live="polite"></div>
+                <div id="screenFlash" class="screen-flash"></div>
+
+                <div class="mobile-controls" aria-label="Mobil kontroller">
+                    <button id="mobileLeft" type="button">←</button>
+                    <button id="mobileJump" type="button">↑</button>
+                    <button id="mobileRight" type="button">→</button>
+                    <button id="mobileAction" class="mobile-action" type="button">E</button>
+                </div>
+            </section>
+
+            <aside class="side-panel right-panel">
+                <section class="panel-card status-card">
+                    <div class="card-title">
+                        <span class="title-icon">♥</span>
+                        <h2>Saha Durumu</h2>
+                    </div>
+
+                    <div class="status-line">
+                        <span>Enerji</span>
+                        <div id="heartList" class="hearts">♥ ♥ ♥</div>
+                    </div>
+
+                    <div class="status-line">
+                        <span>Toplanan delil</span>
+                        <strong><span id="evidenceText">0</span>/<span id="evidenceGoalText">6</span></strong>
+                    </div>
+
+                    <div class="bag-quality">
+                        <div><span>Yayın hazırlığı</span><strong id="bagQualityText">0%</strong></div>
+                        <div class="progress-track"><div id="bagQualityBar" class="progress-fill bag-fill"></div></div>
+                    </div>
+
+                    <div class="inventory">
+                        <div class="inventory-item">
+                            <span class="item-icon camera-icon">▣</span>
+                            <div><small>Kamera kaydı</small><strong id="cameraCount">0</strong></div>
+                        </div>
+                        <div class="inventory-item">
+                            <span class="item-icon mic-icon">●</span>
+                            <div><small>Röportaj notu</small><strong id="micCount">0</strong></div>
+                        </div>
+                        <div class="inventory-item">
+                            <span class="item-icon file-icon">▤</span>
+                            <div><small>Haber dosyası</small><strong id="fileCount">0</strong></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel-card live-ops-card">
+                    <div class="card-title">
+                        <span class="title-icon">⚡</span>
+                        <h2>Saha Akışı</h2>
+                    </div>
+                    <div class="ops-line"><span>Karar</span><strong id="branchStatusText">Bekleniyor</strong></div>
+                    <div class="ops-line"><span>Drone</span><strong id="droneStatusText">Hazır</strong></div>
+                    <div class="ops-line"><span>Gizli yol</span><strong id="secretStatusText">0</strong></div>
+                    <div class="ops-line"><span>Yardımcı</span><strong id="helperStatusText">Yok</strong></div>
+                </section>
+
+                <section class="panel-card daily-card">
+                    <div class="card-title">
+                        <span class="title-icon">☀</span>
+                        <h2>Günlük Görevler</h2>
+                    </div>
+                    <div id="dailyTaskList" class="daily-task-list"></div>
+                </section>
+
+                <section class="panel-card checkpoint-card">
+                    <div class="card-title">
+                        <span class="title-icon">✓</span>
+                        <h2>Kontrol Noktaları</h2>
+                    </div>
+                    <div id="checkpointList" class="checkpoint-list"></div>
+                </section>
+
+                <section class="panel-card objective-card">
+                    <div class="card-title">
+                        <span class="title-icon">★</span>
+                        <h2>Bölüm Hedefi</h2>
+                    </div>
+                    <p id="objectiveText">En az 6 delil topla ve iki kontrol noktasını geç.</p>
+                </section>
+            </aside>
+        </main>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
